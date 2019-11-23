@@ -7,7 +7,6 @@ import { environment } from './../../../environments/environment';
 const getLogLevel = (logLevel: string): number => {
 
     switch (logLevel) {
-
         case 'ALL':
             return 1;
         case 'DEBUG':
@@ -28,11 +27,11 @@ const getLogLevel = (logLevel: string): number => {
 };
 
 export interface ILoggingService {
-    debug(logObject: object, e?: any);
-    info(logObject: object, e?: any);
-    warn(logObject: object, e?: any);
-    error(logObject: object, e?: any);
-    fatal(logObject: object, e?: any);
+    debug(logObject: object | string, e?: any): void;
+    info(logObject: object | string, e?: any): void;
+    warn(logObject: object | string, e?: any): void;
+    error(logObject: object | string, e?: any): void;
+    fatal(logObject: object | string, e?: any): void;
 }
 
 @Injectable()
@@ -54,19 +53,19 @@ export class LoggingService implements ILoggingService {
         this.errorLevel = getLogLevel('ERROR');
         this.fatalLevel = getLogLevel('FATAL');
     }
-    public debug(logger: any, logObject: object | string) {
+    public debug(logger: any, logObject: object | string): void {
         this.log(logger, this.debugLevel, logObject);
     }
-    public info(logger: any, logObject: object | string) {
+    public info(logger: any, logObject: object | string): void {
         this.log(logger, this.infoLevel, logObject);
     }
-    public warn(logger: any, logObject: object | string) {
+    public warn(logger: any, logObject: object | string): void {
         this.log(logger, this.warnLevel, logObject);
     }
-    public error(logger: any, logObject: object | string) {
+    public error(logger: any, logObject: object | string): void {
         this.log(logger, this.errorLevel, logObject);
     }
-    public fatal(logger: any, logObject: object | string) {
+    public fatal(logger: any, logObject: object | string): void {
         this.log(logger, this.fatalLevel, logObject);
     }
 
@@ -82,17 +81,21 @@ export class LoggingService implements ILoggingService {
         return loggerName;
     }
 
-    private log = (logger: any, level: number, logObject: object | string) => {
+    private log = (logger: any, level: number, logObject: object | string): void => {
         const loggerName = this.getLoggerName(logger);
+
         if (typeof logObject === 'string') {
             logObject = `${loggerName}: ${logObject}; (appVersion: ${application.version}, clientUrl: ${location.href})`;
         } else if (typeof logObject === 'object') {
             logObject = `${loggerName}: ${JSON.stringify(logObject)}; (appVersion: ${application.version}, clientUrl: ${location.href})`;
         }
+
         const logLevel = getLogLevel(environment.logLevel);
+
         if (logLevel === 0 || level < logLevel) {
             return;
         }
+
         switch (level) {
             case this.debugLevel:
             case this.infoLevel:
